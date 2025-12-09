@@ -1,14 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router';
 import API_BASE_URL from "./services/api.js";
 import './App.css'
 
 function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [token, setToken_] = useState(localStorage.getItem("token") ||null);
+  const navigate = useNavigate();
+
+  const setToken = (newToken) => {
+    setToken_(newToken);
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('form');
+    // console.log('form');
     const form = new FormData();
     form.append('email', email);
     form.append('password', password);
@@ -24,18 +31,20 @@ function App() {
             password: password
         }),
       })
-
-      if(response){
-        console.log(response);
-        console.log('connexion avec token')
-      }else{
-        console.log('pas de token')
-        
-      }
+      .then(res => res.json())
+      .then(data => {
+        if(data.token){
+          // console.log(data);
+          localStorage.setItem("token", data.token);
+          setToken(data.token);
+          navigate('/success');
+        }
+      })
     }catch (error){
       console.error('Error during form submission:', error);
     }
   };
+
 
   return (
     <>
